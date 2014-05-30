@@ -1,10 +1,9 @@
 #!/usr/bin/env python 
 
-# Dylan W. Schwilk
-# - editted by Will Pearse
+# Authors: Dylan W. Schwilk and Will Pearse
 
-# Utilities for matching taxon names, explaning from synonym lists, merging,
-# and fuzzy matching using Levenshtein distances or ratios
+# Utilities for matching taxon names and fuzzy matching using Levenshtein
+# distances or ratios 
 # -- and now a little quicker using existing code
 # 
 
