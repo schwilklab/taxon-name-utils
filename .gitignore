@@ -1,10 +1,10 @@
-'# R code ignores
+# R code ignores
 *.Rhistory
 *.Rdata
 *.DS_Store
 *.Rapp.history
 
-'#emacs code ignores
+#emacs code ignores
 *~
 
 #ignore results for now as they can be recreated
