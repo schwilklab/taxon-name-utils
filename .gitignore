@@ -1,0 +1,8 @@
+# R code ignores
+*.Rhistory
+*.Rdata
+*.DS_Store
+*.Rapp.history
+
+#ignore results for now as they can be recreated
+/results/
