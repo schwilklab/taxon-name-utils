@@ -1,4 +1,4 @@
- #!/usr/bin/env bash
+#!/usr/bin/env bash
 
 TANKNAMES="../data/name-lists/tank-tree-names.txt"
 EXPANDED_NAMES="../results/expanded-tank-tree-names.txt"
