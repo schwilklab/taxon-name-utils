@@ -16,8 +16,9 @@ the entire lookup data is re-read each time the program is run. But it works.
 __version__ =    '''0.2'''
 __program__ =    '''synonymize.py'''
 __author__  =    '''Dylan Schwilk'''
-__usage__   =    '''synonymize.py [options] [names_file]'''
+__usage__   =    '''synonymize.py [options] names_file'''
 
+import codecs
 import logging
 logging.basicConfig(format='%(levelname)s: %(message)s')
 tpl_logger = logging.getLogger('tpl_logger')
@@ -31,12 +32,13 @@ accepted2syn = {}
 tpl_accepted_names = []
 
 def read_names(src):
+    """`src` is a file object)"""
     return([line.rstrip() for line in src])
 
 def make_tpl_dicts(tpl):
-    """Create dictionaries from the tpl ragged array. There can be multiple
-accepteds per synonym (synonyms without author info) and of course multiple
-synonyms per accepted, so both dictionaries must be string:set
+    """Create dictionaries from the tpl ragged array. `tpl` is a file object. There
+can be multiple accepteds per synonym (synonyms without author info) and of
+course multiple synonyms per accepted, so both dictionaries must be string:set
 
     """
     syn2accepted.clear()
@@ -101,6 +103,9 @@ def main():
     import sys   
     from optparse import OptionParser
 
+    # make sure stdin and stdout is in unicode
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
+    
     parser = OptionParser(usage=__usage__, version ="%prog " + __version__)
     parser.add_option("-a", "--action", action="store", type="string", \
                       dest="action",  default = 'expand', help="Action to perform, 'expand' or 'merge'")
@@ -118,15 +123,19 @@ def main():
     
     if len(args) == 1 :
         try :
-            names = read_names(open(args[0]))
+            names = read_names(codecs.open(args[0], "r", "utf-8"))
         except IOError:
             tpl_logger.error('Error reading file, %s' % args[0])
             sys.exit()
     else:
-        names = read_names(sys.stdin)
+        # We can't use stdin as a fallback because we are not guaranteed stdin
+        # to be utf on all platforms (python 3 fixes this)
+        tpl_logger.error('No names file provided')
+        sys.exit()
 
-    # make the lookup
-    make_tpl_dicts(open(options.TPL_FILE))
+    # make the lookup. Note that PL lacks non ascii chars, but for internal
+    # consistency, let's keep everything unicode
+    make_tpl_dicts(codecs.open(options.TPL_FILE, "r", "utf-8"))
 
     # expand or merge
     if options.action=="expand" :
