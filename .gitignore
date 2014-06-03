@@ -3,7 +3,10 @@
 *.Rdata
 *.DS_Store
 *.Rapp.history
+# ignore python intermediates
+*.pyc
 #emacs code ignores
+*_flymake.py
 *~
 #ignore results for now as they can be recreated
 /results/
