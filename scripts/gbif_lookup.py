@@ -17,13 +17,13 @@ tanknames = read_names(codecs.open("../results/expanded-tank-tree-names.txt", "r
 gbifnames = read_names(codecs.open("../data/name-lists/gbif-occurrences-names.txt", "r", "utf-8"))
 
 # How to handle the fact that TPL has three part naems and gbif does not?  For now:
-tanknames = filter(lambda x: len(x.split()) == 2, tanknames)
+# tanknames = filter(lambda x: len(x.split()) == 2, tanknames)
 # If I don't do the above, then the matching will use those three parters but
 # ignore the var or subsp. part. But that implies synonymity that may not be
 # true!
 
 # outputs
-gbif_lookup_file = "../results/gbif_tank_lookup.txt"
+gbif_lookup_file = "../results/gbif_tank_lookup_140606_loosen.txt"
 #unmatched_file  = "../results/gbif_tank_lookup_unmatched.txt"
 outf = codecs.open(gbif_lookup_file, "w", "utf-8")
 #unmatchedf = codecs.open(unmatched_file, "w", "utf-8")
