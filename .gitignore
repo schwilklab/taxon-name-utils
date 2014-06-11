@@ -1,12 +1,12 @@
 # R code ignores
 *.Rhistory
-*.Rdata
+*.R[Dd]ata
 *.DS_Store
 *.Rapp.history
 # ignore python intermediates
 *.pyc
-#emacs code ignores
+# emacs code ignores
 *_flymake.py
 *~
-#ignore results for now as they can be recreated
+# ignore results for now as they can be recreated
 /results/
