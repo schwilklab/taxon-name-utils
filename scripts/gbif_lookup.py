@@ -23,7 +23,7 @@ gbifnames = read_names(codecs.open("../data/name-lists/gbif-occurrences-names.tx
 # true!
 
 # outputs
-gbif_lookup_file = "../results/gbif_tank_lookup_140610.txt"
+gbif_lookup_file = "../results/gbif_tank_lookup_140611.csv"
 #unmatched_file  = "../results/gbif_tank_lookup_unmatched.txt"
 outf = codecs.open(gbif_lookup_file, "w", "utf-8")
 #unmatchedf = codecs.open(unmatched_file, "w", "utf-8")

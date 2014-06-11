@@ -10,7 +10,7 @@ library(stringr)
 ## matches in which both names are a TPL name as those are probably false
 ## positives.
 
-gbif2tank <-  read.csv("../results/gbif_tank_lookup_140610.txt", stringsAsFactors=FALSE)
+gbif2tank <-  read.csv("../results/gbif_tank_lookup_140610-B.txt", stringsAsFactors=FALSE)
 names(gbif2tank) <- c("gbif","tank", "genus_jw", "se_jw", "gswitch")
 fmatches <- subset(gbif2tank, tank!=gbif)
 length(fmatches$gbif)
@@ -25,7 +25,9 @@ length(gbif2tank$gbif)
 ## drophyphen <-  str_split_fixed(unmatched[hyphens], "-", 2)[,1]
 ## head(drophyphen)
 
+
 tpl <- read.csv("../data/theplantlist1.1/names_unique.csv", stringsAsFactors=FALSE)
+# tpl <- subset(tpl, status != "Unresolved")  # ignore unresolved names?
 tpl <- paste(tpl$genus, tpl$species)
 
 
@@ -40,7 +42,6 @@ gbif2tank$suspect <- gbif2tank$genus_jw < 0.96 |  gbif2tank$se_jw < 0.96
 gbif2tank$remove <- gbif2tank$bothtpl & gbif2tank$suspect & 
         ( gbif2tank$gswitch != "True" )
 
-
 remove <- subset(gbif2tank, remove)
 length(remove$gbif)
 
@@ -48,7 +49,8 @@ keep <- subset(gbif2tank, !remove)
 keep <- keep[with(keep,order(se_jw)),]
 length(subset(keep, se_jw < 0.96)$gbif)
 
+head(keep[with(keep, order(se_jw)),])
 # now manually check other suspects!
 
-write.csv(gbif2tank, "../data/name-lists/gbif_tank_lookup_140610_cleaned.csv", row.names=FALSE)
+write.csv(gbif2tank, "../data/name-lists/gbif_tank_lookup_140610-B_cleaned.csv", row.names=FALSE)
 
