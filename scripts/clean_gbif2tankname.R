@@ -26,9 +26,10 @@ length(gbif2tank$gbif)
 ## head(drophyphen)
 
 
-tpl <- read.csv("../data/theplantlist1.1/names_unique.csv", stringsAsFactors=FALSE)
+#tpl <- read.csv("../data/theplantlist1.1/names_unique.csv", stringsAsFactors=FALSE)
+tpl <- scan("../data/theplantlist1.1/tpl_accepted_and_syn", "character", sep="\n")
 # tpl <- subset(tpl, status != "Unresolved")  # ignore unresolved names?
-tpl <- paste(tpl$genus, tpl$species)
+#tpl <- paste(tpl$genus, tpl$species)
 
 
 # names that are both TPL names, could be wrong
@@ -54,3 +55,12 @@ head(keep[with(keep, order(se_jw)),])
 
 write.csv(gbif2tank, "../data/name-lists/gbif_tank_lookup_140610-B_cleaned.csv", row.names=FALSE)
 
+###
+
+checked_names <- read.csv("../data/name-lists/gbif_tank_lookup_140610-B_cleaned_manually_checked.csv", stringsAsFactors=FALSE)
+
+checked_names$keep.manual[is.na(checked_names$keep.manual)] <- ! checked_names$remove[is.na(checked_names$keep.manual)]
+
+final.lookup <- subset(checked_names, keep.manual)
+
+write.csv(final.lookup, "../data/name-lists/gbif_tank_lookup_final.csv", row.names=FALSE)
