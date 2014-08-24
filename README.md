@@ -38,10 +38,11 @@ The `expand_tanknames.sh` provides an example usage expanding the canonical name
 ### Name matching ###
 
 - `fuzzy_match.py` provides the `fuzzy_match_name_list()` function.
-- `gbif_lookup.py` creates a lookup table from the expanded tank tree names created by `expand_tanknames.sh` to the names found in the gbif database according to `/data/names-lists/gbif-occurrences-names.txt`.
+- `gbif_lookup.py` is an example script that demonstrates how to use the `fuzzy_match_name_list` function.  The script creates a lookup table from the expanded [Tank et al.][TankTree] tree names created by `expand_tanknames.sh` to the names found in the [gbif][GBIF] database according to `/data/names-lists/gbif-occurrences-names.txt`.
 
 
 [ejforrestel]: https://github.com/ejforrestel
+[GBIF]: http://www.gbif.org/
 [TPL]: http://www.theplantlist.org/
 [TPL-accepted]: http://www.theplantlist.org/1.1/about/#accepted
 [TankTree]: http://datadryad.org/resource/doi:10.5061/dryad.63q27/3
