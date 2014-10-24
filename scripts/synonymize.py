@@ -13,7 +13,7 @@ the entire lookup data is re-read each time the program is run. But it works.
 
 """
 
-__version__ =    '''0.2'''
+__version__ =    '''0.3'''
 __program__ =    '''synonymize.py'''
 __author__  =    '''Dylan Schwilk'''
 __usage__   =    '''synonymize.py [options] names_file'''
@@ -23,19 +23,25 @@ import logging
 logging.basicConfig(format='%(levelname)s: %(message)s')
 tpl_logger = logging.getLogger('tpl_logger')
 
-# The Plant List synonymy table:
+# The Plant List synonymy table: currently with underscores separating name
+# parts, hence need to replace with spaces in code below.
 TPL_FILE = "../data/theplantlist1.1/TPL1_1_synonymy_list"
 
 # global dicts
 syn2accepted = {}
 accepted2syn = {}
-tpl_accepted_names = []
+tpl_accepted_names = set()
 
 def read_names(src):
     """`src` is a file object)"""
     return([line.rstrip() for line in src])
 
-def make_tpl_dicts(tpl):
+def make_binom(name):
+    """Converts a possibly three or more part name to a simple binomial."""
+    l = name.split()
+    return(l[0] + " " + l[1])
+
+def make_tpl_dicts(tpl, force_binom = False):
     """Create dictionaries from the tpl ragged array. `tpl` is a file object. There
 can be multiple accepteds per synonym (synonyms without author info) and of
 course multiple synonyms per accepted, so both dictionaries must be string:set
@@ -44,10 +50,13 @@ course multiple synonyms per accepted, so both dictionaries must be string:set
     syn2accepted.clear()
     accepted2syn.clear()  
     for line in tpl:
-        names = line[:-1].replace("_"," ").split(",")  # replace underscores with spaces
+        # replace underscores with spaces
+        names = line[:-1].replace("_"," ").split(",")
+        if force_binom :
+            names = map(make_binom, names)
         syns = set(names)
         a = names[0]
-        tpl_accepted_names.append(a)  # only used as a default canonical list for merging
+        tpl_accepted_names.add(a)  # only used as a default canonical list for merging
         accepted2syn[a] = syns
         for n in syns :
             if syn2accepted.has_key(n) :
@@ -74,6 +83,26 @@ def expand_names(names):
         r.update(all_synonyms(name))
     return(r)
 
+def bad2good(bad, goodnames=tpl_accepted_names):
+    res = bad
+    if not bad in goodnames :  # name is not already canonical
+        # 2 possibilities: it is an accepted name or a synonym
+        accepteds = syn2accepted.get(bad, set() )
+        cnames = accepteds.intersection(goodnames)
+        if len(cnames) > 0 : # accepts include canonical(s), pop one
+            res = cnames.pop()
+        else : # last try; maybe there is a canonical sister synonym
+            syns = all_synonyms(bad) # get all sister syns of a
+            snames = syns.intersection(goodnames)
+            if len(snames) > 0 :  # might was well take first one, no way to choose:
+                res = snames.pop()
+            # if this doesn't work, stick with original
+            else :
+                tpl_logger.warning("Name not found: " + bad)
+
+    return(res)
+
+
 def merge_names(badnames, goodnames=tpl_accepted_names):
     """Merge list of names using list or set "goodnames" as canonical names.
     Modifies badnames, but with synonyms replaced. If synonym not found, use
@@ -82,20 +111,7 @@ def merge_names(badnames, goodnames=tpl_accepted_names):
     """
     g = set(goodnames)
     for i,n in enumerate(badnames):
-        if not n in g :  # name is not already canonical
-            # 2 possibilities: it is an accepted name or a synonym
-            accepteds = syn2accepted[n]
-            cnames = accepteds.intersection(g)
-            if len(cnames) > 0 : # accepts include canonical(s), pop one
-                badnames[i] = cnames.pop()
-            else : # last try; maybe there is a canonical sister synonym
-                syns = all_synonyms(n) # get all sister syns of a
-                snames = syns.intersection(g)
-                if len(snames) > 0 :  # might was well take first one, no way to choose:
-                    badnames[i] = snames.pop()
-                # if this doesn't work, stick with original
-                else :
-                    tpl_logger.warning("Name not found: " + n)
+        badnames[i] = bad2good(n, goodnames=g)
     return
 
 def main():
@@ -107,12 +123,17 @@ def main():
     sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
     
     parser = OptionParser(usage=__usage__, version ="%prog " + __version__)
-    parser.add_option("-a", "--action", action="store", type="string", \
-                      dest="action",  default = 'expand', help="Action to perform, 'expand' or 'merge'")
-    parser.add_option("-c", "--canonicalfile", action="store", type="string", dest="CANONICAL_NAMES_FILE", 
-                       default="", help="file name for canonical names list, default is to use TPL accepted names")
+    parser.add_option("-a", "--action", action="store", type="string",
+                      dest="action",  default = 'expand',
+                      help="Action to perform, 'expand' or 'merge'")
+    parser.add_option("-c", "--canonicalfile", action="store", type="string",
+                      dest="CANONICAL_NAMES_FILE",
+                      default="", help="file name for canonical names list, default is to use TPL accepted names")
     parser.add_option("-f", "--tplfile", action="store", type="string", dest="TPL_FILE", 
                       default=TPL_FILE, help="Set path to TPL ragged array, default=%default")
+    parser.add_option("-b", "--binomial", action="store_true",
+                      dest="force_binomial", default=False,
+                      help="Print INFO messages to stdout, default=%default")    
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
                       help="Print INFO messages to stdout, default=%default")    
 
@@ -133,16 +154,17 @@ def main():
         tpl_logger.error('No names file provided')
         sys.exit()
 
-    # make the lookup. Note that PL lacks non ascii chars, but for internal
+    # make the lookup. Note that TPL lacks non ascii chars, but for internal
     # consistency, let's keep everything unicode
-    make_tpl_dicts(codecs.open(options.TPL_FILE, "r", "utf-8"))
+    make_tpl_dicts(codecs.open(options.TPL_FILE, "r", "utf-8"), 
+                   force_binom=options.force_binomial)
 
     # expand or merge
     if options.action=="expand" :
         r = expand_names(names)
     elif options.action=="merge":
         if options.CANONICAL_NAMES_FILE :
-            canonical = read_names(open(options.CANONICAL_NAMES_FILE))
+            canonical = read_names(codecs.open(options.CANONICAL_NAMES_FILE, "r", "utf-8"))
             merge_names(names, canonical)
         else :
             merge_names(names)
