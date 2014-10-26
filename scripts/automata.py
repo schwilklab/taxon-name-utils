@@ -1,5 +1,5 @@
 # automata.py module
-# Code by Nick Johnsonz
+# Nick Johnsonz, minor modifications by Dylan Schwilk
 # https://gist.github.com/Arachnid/491973
 # see blog.notdot.net/2010/07/Damn-Cool-Algorithms-Levenshtein-Automata
 

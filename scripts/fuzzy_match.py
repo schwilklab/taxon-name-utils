@@ -48,8 +48,7 @@ def is_gender_switch(seA, seB):
         Bparts = re.match(m, seB)
         A1, A2 = Aparts.groups()
         B1, B2 = Bparts.groups()
-  #      print(A1, A2, B1, B2)
-  #      print(gender_eq[B2])
+
         if ((A1 == B1) and A2 in gender_eq[B2]) :
             return True
         else :
@@ -63,17 +62,20 @@ def genus_species(names):
 sets."""
     genera = {}
     for name in names:
-        parts = name.split()  # ignore all parts after
-        genus = parts[0]
-        se = parts[1]
-        genera.setdefault(genus, set())
-        genera[genus].add(se)
-
+        try :
+            parts = name.split()  # ignore all parts after
+            genus = parts[0]
+            se = parts[1]
+            genera.setdefault(genus, set())
+            genera[genus].add(se)
+        except :
+            print parts
     return(genera)
 
 def best_jw_match(pattern, matches, jw_threshold):
     """Find match within list of candidates with highest Jaro-Winkler similarity.
-Return None if no match is higher than jw_threshold. Returns tuple (match, jw_similarity)"""
+Return None if no match is higher than jw_threshold. Returns tuple (match,
+jw_similarity) """
     jw_dists = map(lambda n : jaro_winkler(pattern,n), matches)
     max_jw = max(jw_dists)
     if(max_jw >= jw_threshold) :
@@ -101,13 +103,14 @@ is chosen. Returns tuple (match, jw_similarity)."""
     return((None,None))
 
 
-def fuzzy_match_name_list(dlist, elist, outfile=sys.stdout, genus_dist= THRESHOLD_DIST_GENUS, se_dist = THRESHOLD_DIST_SE, threshold_jw = THRESHOLD_JW):
+def fuzzy_match_name_list(dlist, elist, outfile=sys.stdout,
+                          genus_dist = THRESHOLD_DIST_GENUS,
+                          se_dist = THRESHOLD_DIST_SE,
+                          threshold_jw = THRESHOLD_JW):
     """Match all taxon names in dlist to best match in elist. Return dictionary
 with matchable names in dlist as keys and best match in elist as values. The
 function writes the output as it progresses so that state is saved (slow
-process), default output is stdout.
-
-    """
+process), default output is stdout."""
 
     ## Get genus->species dicts for both lists
     enames = genus_species(elist)
