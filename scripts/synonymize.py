@@ -32,6 +32,7 @@ syn2accepted = {}
 accepted2syn = {}
 tpl_accepted_names = set()
 syn2canonical = {}  # for canonical names that may not equal tpl accepteds
+canonical_names = set()
 
 def read_names(src):
     """`src` is a file object)"""
@@ -87,6 +88,7 @@ def expand_names(names):
     for name in names:
         syns = all_synonyms(name)
         syns.add(name)
+        canonical_names.add(name)
         for n in syns :
             syn2canonical[n] = name  ## this is the lookup table needed by bad2good
         r.update(syns)
@@ -94,14 +96,15 @@ def expand_names(names):
 
 def bad2good(bad, strict=True):
     """Note: you must run expand_names first so that syn2canonical is filled"""
+    if bad in canonical_names: return bad # avoid overwriting in case of
+                                          # non-unique merge
     if strict : default = ""
     else : default = bad
     return(syn2canonical.get(bad, default))
 
 def merge_names(badnames, goodnames=tpl_accepted_names, strict=False):
-    """Merge list of names using list or set "goodnames" as canonical names.
-    Modifies badnames, but with synonyms replaced. If synonym not found, use
-    actual name in badnames (strict=False)
+    """Merge list of names using list or set "goodnames" as canonical names. If
+    synonym not found, use actual name in badnames (strict=False)
 
     """
     g = set(goodnames)
