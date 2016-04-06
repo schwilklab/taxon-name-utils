@@ -20,12 +20,15 @@ __usage__   =    '''synonymize.py [options] names_file'''
 
 import codecs
 import logging
+import os
 logging.basicConfig(format='%(levelname)s: %(message)s')
 tpl_logger = logging.getLogger('tpl_logger')
 
 # The Plant List synonymy table: currently with underscores separating name
 # parts, hence need to replace with spaces in code below.
-TPL_FILE = "../data/theplantlist1.1/TPL1_1_synonymy_list"
+
+TPL_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                        "../data/theplantlist1.1/TPL1_1_synonymy_list")
 
 # global dicts
 syn2accepted = {}
