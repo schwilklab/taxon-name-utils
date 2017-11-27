@@ -3,6 +3,8 @@ taxon-name-utils
 
 Code and data for plant name synonym expansion and fuzzy name matching.
 
+Current release: [![DOI](https://zenodo.org/badge/20335477.svg)](https://zenodo.org/badge/latestdoi/20335477)
+
 ## Data ##
 
 ### The Plant List ###
