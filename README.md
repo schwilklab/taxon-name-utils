@@ -9,7 +9,7 @@ Current release: [![DOI](https://zenodo.org/badge/20335477.svg)](https://zenodo.
 
 ### The Plant List ###
 
-This is stored at `/data/theplantlist1.1`.  Scraped from [The Plant List][TPL]by [Beth Forrestel][ejforrestel] around 3/30/2014.
+This is stored at `/data/theplantlist1.1`.  Scraped from [The Plant List][TPL] by [Beth Forrestel][ejforrestel] around 3/30/2014.
 
 - /data/theplantlist1.1/families/: lists of all family names by phylum
 - /data/theplantlist1.1/names_unique.csv: All unique plant names in [The Plant List][TPL].  TODO: add metadata on variables
