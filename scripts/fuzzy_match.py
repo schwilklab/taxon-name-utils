@@ -56,27 +56,44 @@ def is_gender_switch(seA, seB):
     except :
         return False
 
+    
+# def parse_species_line(line):
+#     """Return as a three part tuple the original full name (first field before
+# tab), the genus, an created specific epithet field that includes the specific
+#     epithet AND any infraspecificc epithet."""
+#     # print(line)
+#     full_name, parsed_name = line.split("\t")
+#     if(parsed_name == "") return (
+#     gx, genus, sx, se, infra_rank, infra_e, author = parsed_name.split("|")
+#     result = (full_name, genus, ' '.join(filter(None, [se, infra_rank, infra_e])))
+#     return(result)
 
-def genus_species(names):
-    """Split names into genus and set of species. Return dictionary of strings to
-sets."""
+
+def genus_species(lines):
+    """Return dictionary of strings to sets. sets contain parsed species name lines
+in three part tuple. name part stored as three part tuple the original full
+name (first field before tab), the genus, an created specific epithet field
+that includes the specific epithet AND any infraspectifc epithet."""
     genera = {}
-    for name in names:
-        try :
-            parts = name.split()  # ignore all parts after
-            genus = parts[0]
-            se = parts[1]
-            genera.setdefault(genus, set())
-            genera[genus].add(se)
-        except :
-            print parts
+    for l in lines:
+        sl = l.split("\t")
+        if(len(sl) > 1):
+            full_name, parsed_name = sl
+            gx, genus, sx, se, infra_rank, infra_e, author = parsed_name.split("|")
+            pname = (full_name, genus, ' '.join(filter(None, [se, infra_rank, infra_e])))     
+            genera.setdefault(pname[1], set())
+            genera[pname[1]].add(pname)
     return(genera)
+
+
+## TODO: need to wrap the tuple up as an object and define equality, comparison, etc.
+
 
 def best_jw_match(pattern, matches, jw_threshold):
     """Find match within list of candidates with highest Jaro-Winkler similarity.
 Return None if no match is higher than jw_threshold. Returns tuple (match,
 jw_similarity) """
-    jw_dists = map(lambda n : jaro_winkler(pattern,n), matches)
+    jw_dists = list(map(lambda n : jaro_winkler(pattern,n), matches))
     max_jw = max(jw_dists)
     if(max_jw >= jw_threshold) :
         bmatch = matches[jw_dists.index(max_jw)]
@@ -102,33 +119,39 @@ is chosen. Returns tuple (match, jw_similarity)."""
         return(best_jw_match(pattern, matches, jw_threshold))
     return((None,None))
 
-
 def fuzzy_match_name_list(dlist, elist, outfile=sys.stdout,
                           genus_dist = THRESHOLD_DIST_GENUS,
                           se_dist = THRESHOLD_DIST_SE,
                           threshold_jw = THRESHOLD_JW):
-    """Match all taxon names in dlist to best match in elist. Return dictionary
-with matchable names in dlist as keys and best match in elist as values. The
-function writes the output as it progresses so that state is saved (slow
-process), default output is stdout."""
+    """Match all taxon names in dlist to best match in elist.
+
+    This version needs both lists to include the raw scientific name as well as a
+parsed version. A tab separates the two versions on a line and the pipe
+character separates fields within the parsed name (as returned by Cam Webb's
+parsename gawk script)
+
+    Return dictionary with matchable names from dlist (unparsed) as keys and
+best match in elist (unparsed) as values. The function writes the output as it
+progresses so that state is saved (slow process), default output is stdout.
+
+    """
 
     ## Get genus->species dicts for both lists
     enames = genus_species(elist)
-    egenera = enames.keys()
-    egenera.sort()
-
+    egenera = sorted(enames.keys())
     dnames = genus_species(dlist)
 
     res = {}
     genus_matcher = Matcher(egenera, True)
     count=0
     # write header
-    outfile.write("dlist,elist,genus_jw,se_jw,gender_switch\n")
+    outfile.write("dlist\telist\tgenus_jw\tse_jw\tgender_switch\n")
     for genus in sorted(dnames.keys()) :
         best_genus, genus_jw = best_match(genus, genus_matcher, genus_dist, threshold_jw)
         if best_genus :
-            se_matcher = Matcher(sorted(enames[best_genus]), True)
-            for se in dnames[genus]:
+            se_matcher = Matcher(list(map(lambda x : x[2], enames[best_genus])))
+            for se in map(lambda x : x[2], dnames[genus]):
+#                print(se)
                 if count % 100 == 0 : logger.info(str(count) + ": " + genus)
                 count = count+1
                 (best_se, jw) = best_match(se, se_matcher, se_dist, threshold_jw)

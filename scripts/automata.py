@@ -128,7 +128,7 @@ class DFA(object):
     if x is None:
       x = u'\0'
     else:
-      x = unichr(ord(x) + 1)
+      x = chr(ord(x) + 1)
     state_transitions = self.transitions.get(s, {})
     if x in state_transitions or s in self.defaults:
       return x
