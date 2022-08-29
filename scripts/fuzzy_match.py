@@ -4,6 +4,11 @@
 
 # Utilities for fuzzy matching taxon names
 
+"""This version needs both lists to include the raw scientific name as well as a
+parsed version. A tab separates the two versions on a line and the pipe
+character separates fields within the parsed name (as returned by Cam Webb's
+parsename gawk script)"""
+
 from Levenshtein import jaro_winkler as jaro_winkler
 import re
 
@@ -20,6 +25,7 @@ from automata import Matcher as Matcher  # use Levenshtein automaton and DFA
 THRESHOLD_DIST_GENUS = 2 # edit distance
 THRESHOLD_DIST_SE = 3
 THRESHOLD_JW = 0.94 # Final pass Jaro-Winkler cutoff for match
+
 
 def is_gender_switch(seA, seB):
     """Check if specific epithet difference is simply one of latin gender."""
@@ -107,7 +113,6 @@ See automata.py"""
     return(matcher.search(pattern, limit))
 
 
-
 def best_match(pattern, m, limit, jw_threshold):
     """Return best match to pattern in Matcher object, m. This is a two step
 process: First all candidate matches are found up to limit edits from pattern.
@@ -160,9 +165,10 @@ progresses so that state is saved (slow process), default output is stdout.
                     bname = best_genus + " " + best_se
                     name = genus + " " + se
                     res[name] = bname
+                    # check for simple latin gender switch in se
                     if is_gender_switch(se, best_se) : gender_switch = "True"
-                    else : gender_switch = "False"
-                    outfile.write(name + "," + bname + "," + str(genus_jw) + "," + str(jw) + "," + gender_switch + "\n")
+                    else : gender_switch = "False" 
+                    outfile.write(name + "\t" + bname + "\t" + str(genus_jw) + "\t" + str(jw) + "\t" + gender_switch + "\n")
 
             # else :
             #     logger.info("Unmatched: " + genus + "\n")
