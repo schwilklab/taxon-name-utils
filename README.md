@@ -1,20 +1,15 @@
 taxon-name-utils
 ================
 
-Code and data for plant name synonym expansion and fuzzy name matching.
+Code and data for plant name synonym expansion and fuzzy name matching. Most recent use is by the "mycorrhizal soil/climate" analyses, see the [plant_gbif repository](https://github.com/Fireandplants/plant_gbif)
 
 Current release: [![DOI](https://zenodo.org/badge/20335477.svg)](https://zenodo.org/badge/latestdoi/20335477)
 
 ## Data ##
 
-### The Plant List ###
+### The World Flora Online ###
 
-This is stored at `/data/theplantlist1.1`.  Scraped from [The Plant List][TPL] by [Beth Forrestel][ejforrestel] around 3/30/2014.
-
-- /data/theplantlist1.1/families/: lists of all family names by phylum
-- /data/theplantlist1.1/names_unique.csv: All unique plant names in [The Plant List][TPL].  TODO: add metadata on variables
-- /data/theplantlist1.1/TPL1_1_synonymy_list: Synonymy list as a ragged array; comma-separated.  First item is an [accepted name][TPL-accepted].  This is followed by a comma-separated list of synonyms.
-
+We use the `classification.txt` data file downloaded from  [World Flora Online](http://www.worldfloraonline.org/downloadData). `/data/WFO_2_synonym_list.R` produces a reformatted file for `/scripts/synonymize.py`
 
 ### Name lists ###
 
@@ -24,7 +19,7 @@ This is stored at `/data/theplantlist1.1`.  Scraped from [The Plant List][TPL] b
 
 ### Synonym expansion and merging ###
 
-The `/scripts/synonymize.py` utility creates a synonym table from The Plant List data. The idea is to hand the script a list of canonical names (such as the species names associated with your trait data), and obtain a list of names that includes those and all synonyms. For example:
+The `/scripts/synonymize.py` utility creates a synonym table from World Flora ONline. The idea is to hand the script a list of canonical names (such as the species names associated with your trait data), and obtain a list of names that includes those and all synonyms. For example:
 
 ```
 python synonymize.py -b -a expand canonical_names.txt > expanded_names.txt
@@ -32,7 +27,7 @@ python synonymize.py -b -a expand canonical_names.txt > expanded_names.txt
 
 The command above uses the `-b` option to indicate we want to only use binomials and ignore three-part names, the `-a` option gives the action to perform (expand).
 
-The merge action allows merging to a canonical list of names (not necessarily TPL accepted names, although that is the default). Te result will be of the same length as the input expanded names list but every name will be replaced with the corresponding canonical name.  By lining up the expanded list with the merged result one can create a lookup table that allows converting from any synonym to a canonical anme. You will always want to merge back to your original canonical names list:
+The merge action allows merging to a canonical list of names (not necessarily World Flora Online "accepted" names, although that is the default). The result will be of the same length as the input expanded names list but every name will be replaced with the corresponding canonical name.  By lining up the expanded list with the merged result one can create a lookup table that allows converting from any synonym to a canonical anme. You will always want to merge back to your original canonical names list:
 
 ```
 python synonymize.py -b -a merge -c canonical_names.txt expanded_names.txt > ../results/merged-names.txt
@@ -46,7 +41,7 @@ python synonymize.py -h
 
 This could be speeded up by cacheing the lookup dictionaries. As it works now, the entire lookup data is re-read each time the program is run. But it works.
 
-The `expand_names.sh` provides an example usage expanding the canonical names from the [Tank tree][TankTree]. See [Zanne et al 2013][Zanne-etal-2013]. 
+The `expand_names.sh` provides an example usage expanding the canonical names from the [Tank tree][TankTree]. See [Zanne et al 2013][Zanne-etal-2013]. This is just an example. 
 
 ### Name matching ###
 
